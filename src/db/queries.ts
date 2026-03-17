@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+import { getTodayDate } from "../utils/date";
 import db from "./database";
 
 export interface User {
@@ -19,6 +21,18 @@ export interface Streak {
   current_streak: number;
   longest_streak: number;
   last_checkin_date: string | null;
+}
+
+export interface Checkin {
+  id: number;
+  user_id: number;
+  date: string;
+  morning_done: number;
+  evening_done: number;
+  worked_on: string | null;
+  morning_goals: string | null;
+  achieved_goals: number | null;
+  reason_if_no: string | null;
 }
 
 const FREE_AI_INSIGHTS_LIMIT = 3;
@@ -135,4 +149,76 @@ export function getStreak(user_id: number): Streak | undefined {
   return db
     .prepare("SELECT * FROM streaks WHERE user_id = ?")
     .get(user_id) as Streak | undefined;
+}
+
+export function updateStreak(user_id: number, date: string): void {
+  const streak = db
+    .prepare("SELECT * FROM streaks WHERE user_id = ?")
+    .get(user_id) as Streak & { last_checkin_date: string | null };
+
+  const yesterday = dayjs(date).subtract(1, "day").format("YYYY-MM-DD");
+  const isConsecutive = streak.last_checkin_date === yesterday;
+
+  const newStreak = isConsecutive ? streak.current_streak + 1 : 1;
+  const newLongest = Math.max(newStreak, streak.longest_streak);
+
+  db.prepare(`
+    UPDATE streaks
+    SET current_streak = ?,
+        longest_streak = ?,
+        last_checkin_date = ?
+    WHERE user_id = ?
+  `).run(newStreak, newLongest, date, user_id);
+}
+
+export function resetStreak(user_id: number): void {
+  db.prepare(`
+    UPDATE streaks SET current_streak = 0 WHERE user_id = ?
+  `).run(user_id);
+}
+
+export function updateUserGoal(telegram_id: number, goal: string): void {
+  db.prepare("UPDATE users SET goal = ? WHERE telegram_id = ?").run(
+    goal,
+    telegram_id
+  );
+}
+
+// checkin
+
+export function getTodayCheckin(user_id: number): Checkin | undefined {
+  return db.prepare(`
+    SELECT * FROM checkins WHERE user_id = ? AND date = ?
+  `).get(user_id, getTodayDate()) as Checkin | undefined;
+}
+
+export function saveMorningCheckin(user_id: number, goals: string): void {
+  db.prepare(`
+    INSERT INTO checkins (user_id, date, morning_done, morning_goals)
+    VALUES (?, ?, 1, ?)
+    ON CONFLICT(user_id, date) DO UPDATE SET
+      morning_done = 1,
+      morning_goals = ?
+  `).run(user_id, getTodayDate(), goals, goals);
+}
+
+export function saveEveningCheckin(
+  user_id: number,
+  worked_on: string,
+  achieved_goals: boolean,
+  reason_if_no: string | null
+): void {
+  db.prepare(`
+    INSERT INTO checkins (user_id, date, evening_done, worked_on, achieved_goals, reason_if_no)
+    VALUES (?, ?, 1, ?, ?, ?)
+    ON CONFLICT(user_id, date) DO UPDATE SET
+      evening_done = 1,
+      worked_on = ?,
+      achieved_goals = ?,
+      reason_if_no = ?
+  `).run(
+    user_id, getTodayDate(), 1,
+    worked_on, achieved_goals ? 1 : 0, reason_if_no,
+    worked_on, achieved_goals ? 1 : 0, reason_if_no
+  );
 }

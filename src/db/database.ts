@@ -18,6 +18,7 @@ export function initDB(): void {
             morning_time TEXT DEFAULT '08:00',
       evening_time TEXT DEFAULT '21:00',
       timezone TEXT DEFAULT 'Africa/Lagos',
+      goal TEXT,
       is_premium INTEGER DEFAULT 0,
       premium_since TIMESTAMP,
       premium_expires TIMESTAMP,
@@ -32,6 +33,7 @@ export function initDB(): void {
       morning_done INTEGER DEFAULT 0,
       evening_done INTEGER DEFAULT 0,
       worked_on TEXT,
+      morning_goals TEXT
       achieved_goals INTEGER,
       reason_if_no TEXT,
       FOREIGN KEY (user_id) REFERENCES users(id),
