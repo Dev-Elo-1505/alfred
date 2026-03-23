@@ -1,5 +1,6 @@
 import { Telegraf, Scenes, session } from "telegraf";
 import dotenv from "dotenv";
+import http from "http";
 import { initDB } from "./db/database";
 import { onboardingScene } from "./scenes/onboarding";
 import { morningCheckinScene } from "./scenes/morningCheckin";
@@ -37,3 +38,12 @@ setupScheduler(bot);
 bot.launch();
 
 console.log("Alfred is running... 🤖");
+
+// Health check server for Render Free Web Service
+const server = http.createServer((req, res) => {
+    res.writeHead(200);
+    res.end("Alfred is alive!");
+});
+server.listen(process.env.PORT || 3000, () => {
+    console.log(`Health check server listening on port ${process.env.PORT || 3000}`);
+});
