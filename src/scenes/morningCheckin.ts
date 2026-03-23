@@ -1,13 +1,13 @@
-import { Scenes, Markup } from "telegraf";
+import { Scenes } from "telegraf";
 import { getRandomQuote } from "../utils/quotes";
-import { getDaysUntilSept1, getTodayDate } from "../utils/date";
+import { getDaysUntilSept1 } from "../utils/date";
 import { getUserByTelegramId, getStreak, saveMorningCheckin } from "../db/queries";
 import type { BotContext } from "../types";
 
 export const morningCheckinScene = new Scenes.WizardScene<BotContext>(
   "morning-checkin",
 
-  // Step 1 — Send morning message, ask for today's goals
+ 
   async (ctx) => {
     const telegramId = ctx.from!.id;
     const user = getUserByTelegramId(telegramId);

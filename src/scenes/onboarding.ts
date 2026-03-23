@@ -5,17 +5,17 @@ import type { BotContext } from "../types";
 export const onboardingScene = new Scenes.WizardScene<BotContext>(
   "onboarding",
 
-  // Step 1 — Welcome + ask for name confirmation
+  
   async (ctx) => {
     const firstName = ctx.from?.first_name || "there";
     await ctx.reply(
-      `Hii ${firstName}! 🙌\n\nI'm Alfred — your personal accountability assistant.\n\nI'll help you show up for yourself every day and get closer to your dreams. Not with empty words, but with real check-ins, honest reflection, and a streak that'll make you proud to protect.\n\nRemember: you can achieve anything you set your mind to. 💪\n\nNow, let's get this bread! 😤\n\nFirst — what should I call you?`,
+      `Hii ${firstName}! 🙌\n\nI'm Alfred, your personal accountability assistant.\n\nI’ll help you show up for yourself every day and get closer to your dreams. \n\nRemember: you can achieve anything you set your mind to. 💪\n\nNow, let's get this bread! 😤\n\nTo get started, what should I call you?`,
       Markup.removeKeyboard()
     );
     return ctx.wizard.next();
   },
 
-  // Step 2 — Save name, ask what they're working towards
+
   async (ctx) => {
     if (!ctx.message || !("text" in ctx.message)) {
       await ctx.reply("Please type your name so I know what to call you.");
@@ -30,7 +30,7 @@ export const onboardingScene = new Scenes.WizardScene<BotContext>(
     return ctx.wizard.next();
   },
 
-  // Step 3 — Save goal, ask morning check-in time
+
   async (ctx) => {
     if (!ctx.message || !("text" in ctx.message)) {
       await ctx.reply("Tell me what you're working towards — I'm listening.");
@@ -45,7 +45,7 @@ export const onboardingScene = new Scenes.WizardScene<BotContext>(
     return ctx.wizard.next();
   },
 
-  // Step 4 — Save morning time, ask evening check-in time
+  
   async (ctx) => {
     if (!ctx.message || !("text" in ctx.message)) {
       await ctx.reply("Send me a time in HH:MM format, or type skip.");
@@ -70,7 +70,7 @@ export const onboardingScene = new Scenes.WizardScene<BotContext>(
     return ctx.wizard.next();
   },
 
-  // Step 5 — Save evening time, register user, send off
+
   async (ctx) => {
     if (!ctx.message || !("text" in ctx.message)) {
       await ctx.reply("Send me a time in HH:MM format, or type skip.");
@@ -89,7 +89,7 @@ export const onboardingScene = new Scenes.WizardScene<BotContext>(
 
     ctx.wizard.state.eveningTime = input === "skip" ? "21:00" : input;
 
-    // Save everything to DB
+    
     const telegramId = ctx.from!.id;
     const user = upsertUser(
       telegramId,
@@ -101,7 +101,7 @@ export const onboardingScene = new Scenes.WizardScene<BotContext>(
     updateUserGoal(telegramId, ctx.wizard.state.goal!);
 
     await ctx.reply(
-      `You're all set, ${ctx.wizard.state.name}. 🎉\n\nEvery morning at ${ctx.wizard.state.morningTime}, I'll be here — with a quote, your streak, and a countdown to what you're building towards.\n\nEvery evening at ${ctx.wizard.state.eveningTime}, we debrief. No sugarcoating. Just progress.\n\nYou said you're working on: "${ctx.wizard.state.goal}"\n\nI won't let you forget that. 🔒\n\nSee you in the morning. 🌅`
+      `You're all set, ${ctx.wizard.state.name}. 🎉\n\nEvery morning at ${ctx.wizard.state.morningTime}, I'll be here and you will be to build the future you are working towards.\n\nEvery evening at ${ctx.wizard.state.eveningTime}, we debrief. No sugarcoating. Just progress.\n\nYou said you're working on: "${ctx.wizard.state.goal}"\n\nI won't let you forget that. 🔒\n\nSee you in the morning. 🌅`
     );
 
     return ctx.scene.leave();

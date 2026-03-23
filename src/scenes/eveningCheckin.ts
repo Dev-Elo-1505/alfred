@@ -12,7 +12,7 @@ import type { BotContext } from "../types";
 export const eveningCheckinScene = new Scenes.WizardScene<BotContext>(
   "evening-checkin",
 
-  // Step 1 — Ask what they worked on
+ 
   async (ctx) => {
     const telegramId = ctx.from!.id;
     const user = getUserByTelegramId(telegramId);
@@ -24,7 +24,6 @@ export const eveningCheckinScene = new Scenes.WizardScene<BotContext>(
     const firstName = user.first_name || "Champion";
     ctx.wizard.state.userId = user.id;
 
-    // Pull their morning goals if they did morning check-in
     const todayCheckin = getTodayCheckin(user.id) as any;
     if (todayCheckin?.morning_goals) {
       ctx.wizard.state.morningGoals = todayCheckin.morning_goals;
@@ -37,7 +36,7 @@ export const eveningCheckinScene = new Scenes.WizardScene<BotContext>(
     return ctx.wizard.next();
   },
 
-  // Step 2 — Save worked_on, ask if they hit goals
+ 
   async (ctx) => {
     if (!ctx.message || !("text" in ctx.message)) {
       await ctx.reply("Just tell me what you worked on today.");
@@ -58,10 +57,13 @@ export const eveningCheckinScene = new Scenes.WizardScene<BotContext>(
     return ctx.wizard.next();
   },
 
-  // Step 3 — Handle yes/no, conditionally ask why not
+  
   async (ctx) => {
     if (!ctx.message || !("text" in ctx.message)) {
-      await ctx.reply("Tap Yes or No.");
+      await ctx.reply(
+        "Tap Yes or No.",
+        Markup.keyboard([["✅ Yes", "❌ No"]]).oneTime().resize()
+      );
       return;
     }
 
@@ -71,7 +73,7 @@ export const eveningCheckinScene = new Scenes.WizardScene<BotContext>(
       ctx.wizard.state.achievedGoals = true;
       ctx.wizard.state.reasonIfNo = null;
 
-      // Save and update streak
+    
       const user = getUserByTelegramId(ctx.from!.id)!;
       const today = getTodayDate();
       saveEveningCheckin(user.id, ctx.wizard.state.workedOn!, true, null);
@@ -95,11 +97,14 @@ export const eveningCheckinScene = new Scenes.WizardScene<BotContext>(
       return ctx.wizard.next();
 
     } else {
-      await ctx.reply("Tap the Yes or No button for me.");
+      await ctx.reply(
+        "Tap the Yes or No button for me.",
+        Markup.keyboard([["✅ Yes", "❌ No"]]).oneTime().resize()
+      );
     }
   },
 
-  // Step 4 — Handle reason, save, respond with empathy + accountability
+  
   async (ctx) => {
     if (!ctx.message || !("text" in ctx.message)) {
       await ctx.reply("Talk to me — what got in the way?");
@@ -117,7 +122,7 @@ export const eveningCheckinScene = new Scenes.WizardScene<BotContext>(
       reason
     );
 
-    // Don't update streak on missed goals — streak stays but doesn't grow
+    
     await ctx.reply(
       `Thank you for telling me that. Seriously.\n\nMost people won't even admit when they fall short — you just did. That self-awareness? That's actually what growth looks like.\n\nBut here's what I need you to hear: tomorrow is a clean slate. Not a reset — a continuation. Everything you've built is still there.\n\n"${reason}" — okay. Now we know. Let's make sure it doesn't happen again.\n\nGet some rest. I'll be here in the morning with a fresh start. 🌅`
     );

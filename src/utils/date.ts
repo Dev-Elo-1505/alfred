@@ -14,3 +14,17 @@ export function getDaysUntilSept1(): number {
 export function getTodayDate(): string {
     return dayjs().format('YYYY-MM-DD')
 }
+
+export function getWeekDates(): string[] {
+  const dates: string[] = [];
+  const today = dayjs();
+  // Get last 7 days including today
+  for (let i = 6; i >= 0; i--) {
+    dates.push(today.subtract(i, "day").format("YYYY-MM-DD"));
+  }
+  return dates;
+}
+
+export function getDayLabel(date: string): string {
+  return dayjs(date).format("ddd"); // Mon, Tue, Wed...
+}

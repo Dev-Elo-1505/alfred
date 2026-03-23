@@ -217,7 +217,7 @@ export function saveEveningCheckin(
       achieved_goals = ?,
       reason_if_no = ?
   `).run(
-    user_id, getTodayDate(), 1,
+    user_id, getTodayDate(),
     worked_on, achieved_goals ? 1 : 0, reason_if_no,
     worked_on, achieved_goals ? 1 : 0, reason_if_no
   );

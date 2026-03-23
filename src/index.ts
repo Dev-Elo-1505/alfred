@@ -6,6 +6,7 @@ import { morningCheckinScene } from "./scenes/morningCheckin";
 import { eveningCheckinScene } from "./scenes/eveningCheckin";
 import { setupScheduler } from "./scheduler/jobs";
 import type { BotContext } from "./types";
+import { handleProgress } from "./handlers/progress";
 
 dotenv.config();
 initDB();
@@ -26,6 +27,7 @@ bot.use(stage.middleware());
 bot.start((ctx) => ctx.scene.enter("onboarding"));
 bot.command("morning", (ctx) => ctx.scene.enter("morning-checkin"));
 bot.command("evening", (ctx) => ctx.scene.enter("evening-checkin"));
+bot.command("progress", (ctx) => handleProgress(ctx));
 
 
 process.once("SIGINT", () => bot.stop("SIGINT"));

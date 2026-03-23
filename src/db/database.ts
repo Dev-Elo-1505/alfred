@@ -1,7 +1,8 @@
 import Database from "better-sqlite3";
 import path from "path";
 
-const DB_PATH = path.join(process.cwd(), "alfred.db")
+const DB_PATH = process.env.NODE_ENV === "production" ? "/app/data/alfred.db" : path.join(process.cwd(), "alfred.db")
+
 
 const db = new Database(DB_PATH)
 
@@ -33,8 +34,8 @@ export function initDB(): void {
       morning_done INTEGER DEFAULT 0,
       evening_done INTEGER DEFAULT 0,
       worked_on TEXT,
-      morning_goals TEXT
-      achieved_goals INTEGER,
+      morning_goals TEXT,
+      achieved_goals TEXT,
       reason_if_no TEXT,
       FOREIGN KEY (user_id) REFERENCES users(id),
       UNIQUE(user_id, date)
